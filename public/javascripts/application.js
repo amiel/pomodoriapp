@@ -8,13 +8,16 @@ $(document).ready(function() {
 
         // console.log(start_element, start_time, start_date, end_date);
 
-        setInterval(function() {
+        var update = function() {
             var now = new Date,
                 seconds_left = (end_date - now) / 1000,
                 minutes_left = Math.floor(seconds_left / 60),
                 minute_seconds_left = Math.floor(seconds_left % 60);
-            left_element.text(minutes_left + ":" + minute_seconds_left);
-        }, 1000);
+            left_element.text(minutes_left + ":" + minute_seconds_left + " left");
+        };
+
+        setInterval(update, 1000);
+        update();
 
     });
 });

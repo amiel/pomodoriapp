@@ -17,6 +17,7 @@
   <% @pomodoros.each do |p| %>
     <li>
       <h3><%= p.user %></h3>
+      <span class="description"><%= p.description %></span>
       <span class="start time" title="<%= p.started_at %>">started at <%= p.started_at %></span>
       <span class="time left"></span>
     </li>

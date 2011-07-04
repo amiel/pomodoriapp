@@ -12,6 +12,6 @@ abbr[title],dfn[title]{border-bottom:1px dotted;cursor:help;}
 table{border-collapse:collapse;border-spacing:0;}
 hr{display:block;height:1px;border:0;border-top:1px solid #cccccc;margin:1em 0;padding:0;}
 input,select{vertical-align:middle;}
-ul.pomodoros li{display:block;height:200px;width:200px;border:1px solid black;float:left;margin:20px;padding:5px;}
+ul.pomodoros li{display:block;height:100px;width:500px;border:1px solid black;float:left;margin:20px;padding:5px;}ul.pomodoros li h3{font-size:1.1em;margin-bottom:0.2em;}
 ul.pomodoros li .start{font-style:italic;display:block;}
 ul.pomodoros li .left{font-weight:bold;display:block;}

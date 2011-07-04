@@ -30,19 +30,14 @@ DataMapper::Model.raise_on_save_failure = true
 DataMapper.auto_upgrade!
 
 
-
 get '/' do
-  p Pomodoro.all
+  # FIXME: Design a better db so this doesn't have to happen
   @users = Pomodoro.all(:fields => [:user], :unique => true, :order => [:started_at.desc])
-  p @users
   # TODO: find out the actual best way to do this
-  @pomodoros = @users.collect { |pomodoro| Pomodoro.first :user => pomodoro.user, :order => :started_at.desc }
-  p @pomodoros
+  @pomodoros = @users.collect { |pomodoro| Pomodoro.first :user => pomodoro.user, :order => :started_at.desc, :started_at.gt => (Time.now - (25*60)) }
   @pomodoros = @pomodoros.compact
-  p @pomodoros
   erb :'index.html'
 end
-
 
 post '/start' do
   p params
