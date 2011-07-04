@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Pomodoro</title>
+</head>
+<body>
+
+
+<h1>Pomodoros</h1>
+
+<ul>
+  <% Pomodoro.all.each do |p| %>
+    <li><%= p.user %> started at <%= p.started_at %></li>
+  <% end %>
+</ul>
+
+</body>
+</html>
