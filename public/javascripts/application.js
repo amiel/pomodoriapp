@@ -1,4 +1,9 @@
 $(document).ready(function() {
+
+    // $('.timeago').timeago();
+
+
+
     $('.pomodoros .start.time').each(function(index) {
         var start_element = $(this),
             start_time = start_element.attr('title'),

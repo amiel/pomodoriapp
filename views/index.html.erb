@@ -6,6 +6,7 @@
 
   <link href="/stylesheets/css/application.css" media="screen" rel="stylesheet" type="text/css" />
   <script src="http://code.jquery.com/jquery-1.4.4.min.js" type="text/javascript"></script>
+  <script src="/javascripts/jquery.timeago.js" type="text/javascript" charset="utf-8"></script>
   <script src="/javascripts/application.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
@@ -19,6 +20,7 @@
       <h3><%= p.user %></h3>
       <span class="description"><%= p.description %></span>
       <span class="start time" title="<%= p.started_at %>">started at <%= p.started_at %></span>
+      <!-- <span class="timeago" title="<%= p.finish_at %>"></span> -->
       <span class="time left"></span>
     </li>
   <% end %>

@@ -17,6 +17,12 @@ class Pomodoro
   property :user, String, required: true
   property :description, String
   property :started_at, DateTime, required: true, default: proc { Time.now }
+
+  def finish_at
+    # Not sure what the best way to advance a datetime...
+    # DateTime#+ advances by number of days instead of seconds.
+    (started_at.to_time + (25*60) + (120*60)).to_datetime
+  end
 end
 
 
