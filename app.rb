@@ -13,6 +13,9 @@ APP_ROOT = Pathname.new(File.expand_path("..", __FILE__))
 
 require APP_ROOT.join('app/models')
 
+# You might think I'm an idiot for putting this sensitive information in a public repo.
+# You might be right but dude, don't be a dick, get your own free pusher account.
+# http://pusher.com
 Pusher.app_id = '8673'
 Pusher.key = '322ec20ec6e1389ccd71'
 Pusher.secret = '5fd3d7430d6230d40550'
