@@ -1,0 +1,19 @@
+Use the following hooks in the Pomodoro app:
+
+
+Start:
+
+    set MyName to do shell script "whoami"
+    do shell script "curl -d 'username=" & MyName & "&description=$pomodoroName' http://localhost:4567/start"
+
+
+End:
+
+    set MyName to do shell script "whoami"
+    do shell script "curl -d 'username=" & MyName & "' http://localhost:4567/end"
+
+
+Break End:
+
+    set MyName to do shell script "whoami"
+    do shell script "curl -d 'username=" & MyName & "' http://localhost:4567/break_end"
