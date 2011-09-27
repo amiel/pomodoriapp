@@ -13,7 +13,7 @@ $(document).ready(function() {
 
     pomodoros.find('li').each(function() {
         var li = $(this),
-            left_element = li.find('.left');
+            left_element = li.find('time');
 
         var start_time,
             start_date,

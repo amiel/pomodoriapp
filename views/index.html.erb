@@ -2,25 +2,33 @@
 <html lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>Pomodoro</title>
+  <title>Pomodori</title>
 
-  <link href="/stylesheets/css/application.css" media="screen" rel="stylesheet" type="text/css" />
+  <link href="http://fonts.googleapis.com/css?family=Oswald" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/css/application.css" media="screen" rel="stylesheet" type="text/css">
   <script src="http://code.jquery.com/jquery-1.6.4.min.js" type="text/javascript"></script>
   <script src="http://js.pusherapp.com/1.9/pusher.min.js"></script>
   <script src="/javascripts/application.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
 
-
-<h1>Pomodoros</h1>
+<header class="top">
+  <h1>Pomodori</h1>
+</header>
 
 <ul id="pomodoros">
   <% @pomodoros.each do |p| %>
     <li title="<%= p.user %>" data-user-name="<%= p.user %>" class="<%= p.status %>" data-started-at="<%= p.started_at %>" data-finish-at="<%= p.finish_at %>">
-      <h3><%= p.user %></h3>
-      <span class="description"><%= p.description %></span>
-      <span class="time left"></span>
-      <span class="status"><%= p.friendly_status %></span>
+      <header>
+        <h3><%= p.user %></h3>
+      </header>
+      <section>
+        <time><span class="time">0:00</span></time>
+
+        <span class="description"><%= p.description %></span>
+
+        <span class="status"><%= p.friendly_status %></span>
+      </section>
     </li>
   <% end %>
 </ul>
