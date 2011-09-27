@@ -1,51 +1,59 @@
-require "bundler/setup"
-require "sinatra"
+require 'bundler/setup'
 
-require 'dm-core'
-require 'dm-migrations'
-require 'do_sqlite3'
+require 'erubis'
+require 'sinatra'
+
+require 'pusher'
 
 # configure :development do
 
 # end
 
+APP_ROOT = Pathname.new(File.expand_path("..", __FILE__))
 
-class Pomodoro
-  include DataMapper::Resource
+require APP_ROOT.join('app/models')
 
-  property :id, Serial
-  property :user, String, required: true
-  property :description, String
-  property :started_at, DateTime, required: true, default: proc { Time.now }
+Pusher.app_id = '8673'
+Pusher.key = '322ec20ec6e1389ccd71'
+Pusher.secret = '5fd3d7430d6230d40550'
 
-  def finish_at
-    # Not sure what the best way to advance a datetime...
-    # DateTime#+ advances by number of days instead of seconds.
-    (started_at.to_time + (25*60) + (120*60)).to_datetime
+
+Tilt.register :erb, Tilt[:erubis]
+
+helpers do
+  def get_pomodoro_for_user(user_name)
+    user = User.first name: user_name
+    raise "No user for /end user(#{ user_name })" unless user
+    pomodoro = user.latest_pomodoro
+    raise "No pomodoro for /end user(#{ user_name })" unless pomodoro
+    return pomodoro
   end
 end
 
-
-DataMapper.setup(:default, {
-  :adapter => 'sqlite3',
-  :path => 'db/development.sqlite',
-})
-
-DataMapper::Logger.new(STDOUT, :debug)
-DataMapper::Model.raise_on_save_failure = true
-DataMapper.auto_upgrade!
-
-
 get '/' do
-  # FIXME: Design a better db so this doesn't have to happen
-  @users = Pomodoro.all(:fields => [:user], :unique => true, :order => [:started_at.desc])
-  # TODO: find out the actual best way to do this
-  @pomodoros = @users.collect { |pomodoro| Pomodoro.first :user => pomodoro.user, :order => :started_at.desc } # , :started_at.gt => (Time.now - (25*60))
-  @pomodoros = @pomodoros.compact
+  @users = User.all
+  @pomodoros = @users.collect(&:latest_pomodoro).compact
   erb :'index.html'
 end
 
 post '/start' do
-  p params
-  Pomodoro.create :user => params[:username], :description => params[:description]
+  pomodoro = Pomodoro.create user: params[:username], description: params[:description]
+  Pusher['pomodoro'].trigger('start', pomodoro.infos)
 end
+
+post '/end' do
+  pomodoro = get_pomodoro_for_user(params[:username])
+  pomodoro.update status: 'break', finish_at: Time.now
+
+  Pusher['pomodoro'].trigger('end', pomodoro.infos)
+end
+
+
+
+post '/break_end' do
+  pomodoro = get_pomodoro_for_user(params[:username])
+  pomodoro.update status: 'finished'
+
+  Pusher['pomodoro'].trigger('break_end', pomodoro.infos)
+end
+

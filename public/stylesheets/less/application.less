@@ -1,11 +1,15 @@
 @import "lib/reset";
 
 
-ul.pomodoros{
+#pomodoros{
   li{ display: block; height: 100px; width: 500px; border: 1px solid black; float: left; margin: 20px; padding: 5px;
     h3{ font-size: 1.1em; margin-bottom: 0.2em; }
     .description{ display: block; }
     .start{ font-style: italic; display: block; }
     .left{ font-weight: bold; display: block; }
   }
+
+  li.started{ background: green; }
+  li.break{ background: yellow; }
+  li.finished{ background: gray; }
 }
