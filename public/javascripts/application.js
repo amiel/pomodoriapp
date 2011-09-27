@@ -19,21 +19,21 @@ $(document).ready(function() {
             start_date,
             end_date,
 
-            status,
+            status = li.attr('class'),
             timer;
 
 
         var calculate_dates = function() {
             start_time = li.attr('data-started-at');
             finish_time = li.attr('data-finish-at');
-            status = li.attr('class');
             start_date = new Date(Date.parse(start_time));
             finish_date = new Date(Date.parse(finish_time));
             end_date = (function(s) {
-                return {
+                return({
                     started: function(start_date)  { return new Date(+start_date + (25 * 60 * 1000)); },
-                    break: function(finish_date) { return new Date(+finish_date + (5 * 60 * 1000)); }
-                }[s];
+                    break: function(finish_date) { return new Date(+finish_date + (5 * 60 * 1000)); },
+                    finished: function(finish_date) { return finish_date; }
+                }[s] || function() { console.log("calculate_dates: no end_date function for", s); });
             })(status)(start_date);
 
 
@@ -44,14 +44,18 @@ $(document).ready(function() {
         var update = function() {
             var now = new Date,
                 seconds_left = (end_date - now) / 1000,
-                minutes_left = Math.floor(seconds_left / 60),
-                minute_seconds_left = Math.floor(seconds_left % 60);
+                minutes_left = Math.floor(seconds_left / 60).toString(),
+                minute_seconds_left = Math.floor(seconds_left % 60).toString();
 
-            if (seconds_left < 0) {
+            if (minute_seconds_left.length == 1) {
+                minute_seconds_left = "0" + minute_seconds_left;
+            }
+
+            if (seconds_left < 0 || isNaN(seconds_left)) {
                 stop_timer();
                 left_element.text("");
             } else {
-                left_element.text(minutes_left + ":" + minute_seconds_left + " left");
+                left_element.text(minutes_left + ":" + minute_seconds_left);
             }
         };
 
