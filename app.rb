@@ -31,32 +31,49 @@ helpers do
     raise "No pomodoro for /end user(#{ user_name })" unless pomodoro
     return pomodoro
   end
+
+  def time(msg)
+    puts msg
+    now = Time.now
+    result = yield
+    puts "-- TOOK #{ Time.now - now } seconds"
+    result
+  end
 end
 
 get '/' do
-  @users = User.all
-  @pomodoros = @users.collect(&:latest_pomodoro).compact
-  erb :'index.html'
+  time "POMODORO GET /" do
+    @users = User.all
+    @pomodoros = @users.collect(&:latest_pomodoro).compact
+    erb :'index.html'
+  end
 end
 
 post '/start' do
-  pomodoro = Pomodoro.create user: params[:username], description: params[:description]
-  Pusher['pomodoro'].trigger('start', pomodoro.infos)
+  time "POMODORO START: #{ params[:username] }" do
+    pomodoro = Pomodoro.create user: params[:username], description: params[:description]
+    Pusher['pomodoro'].trigger('start', pomodoro.infos)
+  end
 end
 
 post '/end' do
-  pomodoro = get_pomodoro_for_user(params[:username])
-  pomodoro.update status: 'break', finish_at: Time.now
+  time "POMODORO BREAK: #{ params[:username] }" do
+    pomodoro = get_pomodoro_for_user(params[:username])
+    pomodoro.update status: 'break', finish_at: Time.now
 
-  Pusher['pomodoro'].trigger('end', pomodoro.infos)
+    Pusher['pomodoro'].trigger('end', pomodoro.infos)
+  end
 end
 
 
 
 post '/break_end' do
-  pomodoro = get_pomodoro_for_user(params[:username])
-  pomodoro.update status: 'finished'
+  time "POMODORO FINISH: #{ params[:username] }" do
 
-  Pusher['pomodoro'].trigger('break_end', pomodoro.infos)
+    pomodoro = get_pomodoro_for_user(params[:username])
+    pomodoro.update status: 'finished'
+
+    Pusher['pomodoro'].trigger('break_end', pomodoro.infos)
+  end
 end
 
