@@ -2,11 +2,34 @@ Pusher.log = function(message) {
     if (window.console && window.console.log) window.console.log(message);
 };
 
+
+
+var Updater = (function() {
+    var functions = [];
+    var add = function(to_add) {
+        functions.push(to_add);
+    };
+
+    var remove = function(to_remove) {
+        functions = $.map(functions, function(e) { if (e != to_remove) return e; });
+    };
+
+    var update = function() {
+        $.each(functions, function() {
+            this();
+        });
+    };
+
+    var timer = setInterval(update, 1000);
+
+    return {
+        add: add,
+        remove: remove
+    }
+})();
+
+
 $(document).ready(function() {
-
-
-    var pusher = new Pusher('322ec20ec6e1389ccd71');
-    var pomodoro_channel = pusher.subscribe('pomodoro');
 
     var pomodoros = $('#pomodoros');
 
@@ -19,8 +42,7 @@ $(document).ready(function() {
             start_date,
             end_date,
 
-            status = li.attr('class'),
-            timer;
+            status = li.attr('class');
 
 
         var calculate_dates = function() {
@@ -37,7 +59,7 @@ $(document).ready(function() {
             })(status)(start_date);
 
 
-            console.log("calculate_dates status:", status, "start_date:", start_date, "finish_date:", finish_date);
+            console.log("calculate_dates for", li.attr('title'), "status:", status, "start_date:", start_date, "finish_date:", finish_date);
         };
 
 
@@ -46,6 +68,8 @@ $(document).ready(function() {
                 seconds_left = (end_date - now) / 1000,
                 minutes_left = Math.floor(seconds_left / 60).toString(),
                 minute_seconds_left = Math.floor(seconds_left % 60).toString();
+
+            // console.log("UPDATE", seconds_left, minutes_left, minute_seconds_left, li.attr('title'), status);
 
             if (minute_seconds_left.length == 1) {
                 minute_seconds_left = "0" + minute_seconds_left;
@@ -61,12 +85,12 @@ $(document).ready(function() {
 
         var start_timer = function() {
             calculate_dates();
-            timer = setInterval(update, 1000);
-            update();
+            Updater.add(update);
         };
 
         var stop_timer = function() {
-            clearInterval(timer);
+            Updater.remove(update);
+            left_element.text('');
         };
 
         var restart_timer = function() {
@@ -74,36 +98,54 @@ $(document).ready(function() {
             start_timer();
         };
 
+        li.bind('stop_timer', stop_timer);
+        li.bind('restart_timer', restart_timer);
+
+        li.bind('update_status', function() {
+            status = li.attr('class');
+        });
+
         start_timer();
+    });
 
-        var update_element = function(infos) {
-            status = infos.status;
+    (function() {
 
-            var element = pomodoros.find('li[title="' + infos.name + '"]');
+
+        var pusher = new Pusher('322ec20ec6e1389ccd71');
+        var pomodoro_channel = pusher.subscribe('pomodoro');
+
+        var get_element = function(infos) {
+            return pomodoros.find('li[title="' + infos.name + '"]');
+        };
+
+        var update_element = function(element, infos) {
             // TODO: Use weld to create/render them pomodoros.
 
             element.find('.description').text(infos.description);
             element.attr('data-started-at', infos.started_at);
             element.attr('data-finish-at', infos.finish_at);
             element.find('.status').text(infos.friendly_status);
-            element.attr('class', status);
+            element.attr('class', infos.status);
+
+            element.trigger('update_status');
         };
 
         pomodoro_channel.bind('start', function(infos) {
-            update_element(infos);
-            restart_timer();
+            var element = get_element(infos)
+            update_element(element, infos);
+            element.trigger('restart_timer');
         });
 
         pomodoro_channel.bind('end', function(infos) {
-            update_element(infos);
-            restart_timer();
+            var element = get_element(infos)
+            update_element(element, infos);
+            element.trigger('restart_timer');
         });
 
         pomodoro_channel.bind('break_end', function(infos) {
-            update_element(infos);
-            stop_timer();
-            left_element.text("");
+            var element = get_element(infos)
+            update_element(element, infos);
+            element.trigger('stop_timer');
         });
-    });
-
+    })();
 });
