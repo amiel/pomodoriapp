@@ -39,9 +39,9 @@ class Pomodoro
     super || (started_at.to_time + (25*60) + (120*60)).to_datetime
   end
 
-  def user=(user_name)
-    if String === user_name
-      super User.first_or_create(name: user_name)
+  def user=(name)
+    if String === name
+      super User.first_or_create(name: name)
     else
       super
     end
@@ -55,9 +55,13 @@ class Pomodoro
     })[status]
   end
 
+  def user_name
+    user.name if user
+  end
+
   def infos
     {
-      name: user.name,
+      name: user_name,
       description: description,
       friendly_status: friendly_status,
       status: status,

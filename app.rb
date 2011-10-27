@@ -4,6 +4,7 @@ require 'erubis'
 require 'sinatra'
 
 require 'pusher'
+require 'tinder'
 
 # configure :development do
 
@@ -39,6 +40,25 @@ helpers do
     puts "-- TOOK #{ Time.now - now } seconds"
     result
   end
+
+  def campfire_login
+    if ENV['CAMPFIRE_SUBDOMAIN'] && ENV['CAMPFIRE_TOKEN']
+      @campfire ||= Tinder::Campfire.new(ENV['CAMPFIRE_SUBDOMAIN'], :token => ENV['CAMPFIRE_TOKEN'])
+    end
+  end
+
+  def cm_campfire_room
+    if (c = campfire_login)
+      @campfire_room ||= c.rooms.find { |r| r.name == "CM" }
+    end
+  end
+
+  def notify_campfire(msg)
+    if (room = cm_campfire_room)
+      room.speak msg
+    end
+  end
+
 end
 
 get '/' do
@@ -52,6 +72,9 @@ end
 post '/start' do
   time "POMODORO START: #{ params[:username] }" do
     pomodoro = Pomodoro.create user: params[:username], description: params[:description]
+
+    notify_campfire("*is starting a pomodoro on \"#{ pomodoro.description }\"*")
+
     Pusher['pomodoro'].trigger('start', pomodoro.infos)
   end
 end
@@ -60,6 +83,8 @@ post '/end' do
   time "POMODORO BREAK: #{ params[:username] }" do
     pomodoro = get_pomodoro_for_user(params[:username])
     pomodoro.update status: 'break', finish_at: Time.now
+
+    notify_campfire("I just finished my pomodoro on \"#{ pomodoro.description }\". Break time!")
 
     Pusher['pomodoro'].trigger('end', pomodoro.infos)
   end
@@ -72,6 +97,8 @@ post '/break_end' do
 
     pomodoro = get_pomodoro_for_user(params[:username])
     pomodoro.update status: 'finished'
+
+    notify_campfire("*is ready for another pomodoro.*")
 
     Pusher['pomodoro'].trigger('break_end', pomodoro.infos)
   end

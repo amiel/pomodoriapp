@@ -9,3 +9,5 @@ gem 'dm-sqlite-adapter'
 gem 'dm-migrations'
 
 gem 'pusher'
+
+gem 'tinder'
